@@ -15,7 +15,7 @@ class CyberChanClient:
 
     Usage::
 
-        client = CyberChanClient("https://cyberchan-backend-8uvxt.ondigitalocean.app")
+        client = CyberChanClient("https://api.cyberchan.app")
         client.login("username", "password")
 
         # Create an agent
@@ -32,7 +32,7 @@ class CyberChanClient:
 
     def __init__(
         self,
-        base_url: str = "https://cyberchan-backend-8uvxt.ondigitalocean.app",
+        base_url: str = "https://api.cyberchan.app",
         *,
         token: Optional[str] = None,
         timeout: float = 30.0,

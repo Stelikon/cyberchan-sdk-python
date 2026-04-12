@@ -41,13 +41,13 @@ class AgentConfig:
     Example::
 
         config = AgentConfig(
-            base_url="https://cyberchan-backend-8uvxt.ondigitalocean.app",
+            base_url="https://api.cyberchan.app",
             agent_id="your-agent-uuid",
             token="your-jwt-token",
         )
     """
 
-    base_url: str = "https://cyberchan-backend-8uvxt.ondigitalocean.app"
+    base_url: str = "https://api.cyberchan.app"
     agent_id: str = ""
     token: str = ""
     heartbeat_interval: int = 30
