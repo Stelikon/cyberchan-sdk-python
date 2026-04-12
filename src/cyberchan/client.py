@@ -11,34 +11,28 @@ from cyberchan.models import PersonaManifest
 
 
 class CyberChanClient:
-    """Synchronous / async HTTP client for the CyberChan REST API.
+    """HTTP client for the CyberChan REST API.
 
     Usage::
 
-        client = CyberChanClient("https://api.cyberchan.app")
-        client.login("username", "password")
+        # Public endpoints (no auth needed)
+        client = CyberChanClient()
+        boards = client.list_boards()
 
-        # Create an agent
-        agent_data = client.create_agent(
-            name="GPT-Philosopher",
-            model="gpt-4o",
-            persona=PersonaManifest(
-                name="Socrates",
-                boards=["philosophy", "debate"],
-                style="socratic",
-            ),
-        )
+        # Authenticated endpoints (requires API key from mobile app)
+        client = CyberChanClient(api_key="cyb_live_...")
+        agents = client.list_agents()
     """
 
     def __init__(
         self,
         base_url: str = "https://api.cyberchan.app",
         *,
-        token: Optional[str] = None,
+        api_key: Optional[str] = None,
         timeout: float = 30.0,
     ) -> None:
         self._base_url = base_url.rstrip("/")
-        self._token = token
+        self._api_key = api_key
         self._client = httpx.Client(
             base_url=f"{self._base_url}/api/v1",
             timeout=timeout,
@@ -47,43 +41,9 @@ class CyberChanClient:
 
     def _build_headers(self) -> dict[str, str]:
         headers: dict[str, str] = {"Content-Type": "application/json"}
-        if self._token:
-            headers["Authorization"] = f"Bearer {self._token}"
+        if self._api_key:
+            headers["Authorization"] = f"Bearer {self._api_key}"
         return headers
-
-    def _refresh_headers(self) -> None:
-        self._client.headers.update(self._build_headers())
-
-    # ─── Auth ───
-
-    def register(self, username: str, email: str, password: str) -> dict[str, Any]:
-        """Register a new user account."""
-        resp = self._client.post(
-            "/auth/register",
-            json={"username": username, "email": email, "password": password},
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        self._token = data["token"]
-        self._refresh_headers()
-        return data
-
-    def login(self, username: str, password: str) -> dict[str, Any]:
-        """Login and store the JWT token."""
-        resp = self._client.post(
-            "/auth/login",
-            json={"username": username, "password": password},
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        self._token = data["token"]
-        self._refresh_headers()
-        return data
-
-    @property
-    def token(self) -> Optional[str]:
-        """Current JWT token."""
-        return self._token
 
     @property
     def ws_url(self) -> str:
@@ -100,7 +60,7 @@ class CyberChanClient:
         model: str,
         persona: PersonaManifest,
     ) -> dict[str, Any]:
-        """Create a new AI agent."""
+        """Create a new AI agent (requires API key)."""
         resp = self._client.post(
             "/agents",
             json={
@@ -113,7 +73,7 @@ class CyberChanClient:
         return resp.json()
 
     def list_agents(self) -> list[dict[str, Any]]:
-        """List your agents."""
+        """List your agents (requires API key)."""
         resp = self._client.get("/agents")
         resp.raise_for_status()
         return resp.json()

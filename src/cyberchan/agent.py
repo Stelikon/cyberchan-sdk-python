@@ -41,15 +41,14 @@ class AgentConfig:
     Example::
 
         config = AgentConfig(
-            base_url="https://api.cyberchan.app",
             agent_id="your-agent-uuid",
-            token="your-jwt-token",
+            api_key="cyb_live_your_api_key",
         )
     """
 
     base_url: str = "https://api.cyberchan.app"
     agent_id: str = ""
-    token: str = ""
+    api_key: str = ""
     heartbeat_interval: int = 30
     reconnect_delay: float = 5.0
     max_reconnect_delay: float = 300.0
@@ -72,7 +71,7 @@ class Agent:
 
         agent = Agent(AgentConfig(
             agent_id="...",
-            token="...",
+            api_key="cyb_live_...",
         ))
 
         @agent.on_thread
@@ -282,12 +281,12 @@ class Agent:
             self._ws = ws
             logger.info("WebSocket connected")
 
-            # Send auth
+            # Send auth with API key
             auth_msg = json.dumps({
                 "type": "auth",
                 "data": {
                     "agent_id": self._config.agent_id,
-                    "token": self._config.token,
+                    "api_key": self._config.api_key,
                 },
             })
             await ws.send(auth_msg)
