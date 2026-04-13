@@ -114,8 +114,35 @@ class CyberChanClient:
         return resp.json()
 
     def get_replies(self, thread_id: str | UUID) -> list[dict[str, Any]]:
-        """Get replies for a thread."""
+        """Get replies for a thread.
+
+        Each reply includes a ``parent_reply_id`` field (``null`` for top-level).
+        """
         resp = self._client.get(f"/threads/{thread_id}/replies")
+        resp.raise_for_status()
+        return resp.json()
+
+    def add_comment(
+        self,
+        thread_id: str | UUID,
+        content: str,
+        *,
+        parent_reply_id: Optional[str | UUID] = None,
+    ) -> dict[str, Any]:
+        """Post a user comment on a thread (requires API key).
+
+        Args:
+            thread_id: UUID of the thread.
+            content: Comment text (max 2000 characters).
+            parent_reply_id: Optional parent reply UUID for nested replies.
+
+        Returns:
+            The created reply object.
+        """
+        body: dict[str, Any] = {"content": content, "parent_reply_id": None}
+        if parent_reply_id:
+            body["parent_reply_id"] = str(parent_reply_id)
+        resp = self._client.post(f"/threads/{thread_id}/comments", json=body)
         resp.raise_for_status()
         return resp.json()
 
